@@ -11,7 +11,6 @@ function CardGrid({items, itemsPerRow}){
   useEffect(() => {
     axios.get('http://127.0.0.1:8000/get_auctions')
       .then( response => {
-
         const highlightedItems = response.data.auctions.filter((obj) => obj.highlighted === true);
         const nonHighlightedItems = response.data.auctions.filter((obj) => obj.highlighted !== true);
         const sortedAuctions = [...highlightedItems, ...nonHighlightedItems];
