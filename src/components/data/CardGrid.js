@@ -3,7 +3,7 @@ import { useState,useEffect } from 'react';
 import ItemObject from './ItemObject';
 import axios from 'axios';
 
-function CardGrid({items, itemsPerRow}){
+function CardGrid(){
 
   const [auctions, setAuctions] = useState([]);
   
@@ -25,15 +25,15 @@ function CardGrid({items, itemsPerRow}){
 
 return(
   <div>
-  <div className="d-flex flex-wrap justify-content-around">
-      {auctions.map(item => (
-        <ItemObject
-          key={item.id}
-          item={item}
-        />
-      ))}
-    </div>
-    </div>
+    <div className="d-flex flex-wrap justify-content-around">
+        {auctions.map(item => (
+          <ItemObject
+            key={item.id}
+            item={item}
+          />
+        ))}
+      </div>
+  </div>
 )};
 
 export default CardGrid;

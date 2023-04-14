@@ -35,6 +35,8 @@ const ItemObject = (props) => {
       };    
   };
 
+
+
   useEffect(() => {
     const datetime = new Date(props.item.end_date);
     const options = {
@@ -51,11 +53,24 @@ const ItemObject = (props) => {
     setEnding(formattedDateTime)
   },[]);
 
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [menuX, setMenuX] = useState(0);
+  const [menuY, setMenuY] = useState(0);
 
+  function handleContextMenu(event) {
+    event.preventDefault();
+    setMenuVisible(!menuVisible);
+  }
+
+  function handleMenuClick() {
+    setMenuVisible(false);
+    // Handle menu item click here
+  }
 
   return (
     <Card {...props} 
         onClick={handleClick}
+        onContextMenu={handleContextMenu}
         className={removed
           ? 'card text-white bg-secondary mb-3'
           : highlighted
@@ -77,10 +92,10 @@ const ItemObject = (props) => {
 
       <Card.Body>
         { highlighted ? <FontAwesomeIcon icon={faHeart} size="lg" color="red" /> : <FontAwesomeIcon icon={faFlag} size="lg" color="yellow" /> }
-        
-        <Card.Title>{props.item.description.slice(0,13)}</Card.Title>
+        { menuVisible ? 
+        <><Card.Title>{props.item.description.slice(0,13)}</Card.Title>
         <Card.Text>{props.item.description}</Card.Text>
-        <Card.Text>{props.item.price}</Card.Text>
+        <Card.Text>{props.item.price}</Card.Text> </>: null }
         
         <Button 
             className="text-capitalize bg-warning"
@@ -99,7 +114,7 @@ const ItemObject = (props) => {
               { removed ? 'Återställ' : 'Ta Bort' }
         </Button>
 
-        <Card.Text>{props.item.search_term} in 
+        <Card.Text>{props.item.search_term} in &nbsp;
           <CategoryStringConverter number={props.item.auction_category} />
         </Card.Text>
       </Card.Body>
