@@ -19,11 +19,12 @@ const ItemObject = (props) => {
   };
   
   const [bidding, setBidding] = useState(Boolean(props.item.bidding_on));
-  const [bid,setBid] = useState(bidding ? fetchBiddingData() : 0);
+  const [bid,setBid] = useState(props.bidding_on ? fetchBiddingData() : 0);
   const [highlighted, setHighlighted] = useState(Boolean(props.item.highlighted));
   const [removed, setRemoved] = useState(Boolean(props.item.removed));
   const [ending_time, setEnding] = useState('')
   const ending_soon = Boolean(props.item.ending_soon)
+  const ended = Boolean(props.item.ended)
 
   const handleHighlight = () => {
     setHighlighted(!highlighted);
@@ -32,22 +33,45 @@ const ItemObject = (props) => {
         console.log(response.data);
       })
       .catch(error => console.log(error));
-  }
-  const handleBid = () => {
+  };
+  const removeBid = () => {
+    setBidding(false);
 
-    setBidding(!bidding);
-    const postData = {
+    axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+    axios.delete('http://127.0.0.1:8000/delete_bid/'+ props.item.id )
+    .then( response => {
+      console.log(response.data);
+    })
+    .catch(error => console.log(error));
+    
+    axios.patch('http://127.0.0.1:8000/bidding_on_auction/'+ props.item.id + '/False')
+    .then( response => {
+      console.log(response.data);
+    })
+    .catch(error => console.log(error));
+  };
+  const handleBid = () => {
+    setBidding(true);
+    const data = {
       auction_id: props.item.id,
       highest_bid: bid,
       ends: props.item.end_date
     };
+    console.log(data)
 
-    axios.post('http://127.0.0.1:8000/insert_bid/'+ props.item.id, postData)
+    axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+    axios.post('http://127.0.0.1:8000/insert_bid/'+ props.item.id, data)
       .then( response => {
         console.log(response.data);
       })
       .catch(error => console.log(error));
-  }
+    axios.patch('http://127.0.0.1:8000/bidding_on_auction/'+ props.item.id + '/True')
+      .then( response => {
+        console.log(response.data);
+      })
+      .catch(error => console.log(error));
+  };
   const handleClick = () => {
     window.open(props.item.item_url, "_blank");
   };
@@ -86,7 +110,7 @@ const ItemObject = (props) => {
   function handleContextMenu(event) {
     event.preventDefault();
     setMenuVisible(!menuVisible);
-  }
+  };
 
   
 
@@ -94,15 +118,14 @@ const ItemObject = (props) => {
     <Card {...props} 
         onClick={handleClick}
         onContextMenu={handleContextMenu}
-        className={removed
-          ? 'card text-white bg-secondary mb-3'
-          : highlighted
-              ? 'card text-white bg-primary mb-3'
-              : ending_soon
-                  ? 'card text-white bg-danger mb-3'
-                  : 'card text-white bg-info mb-3'
-          }
-        >
+        className={removed ? 'card text-white bg-secondary mb-3'
+          : bidding ? 'card text-white bg-warning mb-3'
+          : ending_soon ? 'card text-white bg-danger mb-3'
+          : highlighted ? 'card text-white bg-primary mb-3'
+          : ended ? 'card text-white bg-dark mb-3'
+          : 'card text-white bg-info mb-3' }
+       
+    >
 
 
 
@@ -122,20 +145,34 @@ const ItemObject = (props) => {
         <Form>
           <Form.Group className="mb-3" 
                       controlId="formBid" 
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        handleBid();
-                      }}>
+                      >
             <Form.Label>Max bud</Form.Label>
             <Form.Control type="number"  
                           placeholder="Enter bid" 
+                          onClick={(e) => {e.stopPropagation();}}
                           onChange={(e) => setBid(e.target.value)}/>
 
           </Form.Group>
-          <Button variant="warning" 
-                  type="submit">   
-            Buda
-          </Button>
+          
+          { bidding
+              ? <Button variant="danger" 
+                        type="submit"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          removeBid();
+                        }}>   
+                  Radera Bud
+                </Button>
+              : <Button variant="warning" 
+                        type="submit"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleBid();
+                        }}>   
+                  Buda
+                </Button> }
         </Form>
 
       </>
